@@ -1,0 +1,7 @@
+
+See top level README for documentation on this platform.
+
+The led lives on GPIO44.  This toggles the led on and off.  Timing is
+not nor meant to be accurate, just needs to be slow enough for a human
+to see.  The dummy function is used as it is outside what the optimizer
+can see so the count to N loop doesnt get removed as dead code.

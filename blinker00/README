@@ -1,0 +1,11 @@
+
+See top level README for documentation on this platform.
+
+The led lives on GPIO44
+
+This is a mimimal example in assembly langauge to demonstrate a working
+program (see top level README).  This writes 0x1000 to 0x10000634 which
+cause the (amber) led to go off.  Not uncommon to see the GPIO be on
+the sink side of the led rather than the source (GPIO off or zero makes
+the led go on rather than off).
+

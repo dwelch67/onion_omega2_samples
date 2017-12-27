@@ -1,0 +1,275 @@
+
+There is a so far nice little IoT platform to compete with the raspberry
+pi I guess.  Way overkill for IoT as it is a linux capable/designed
+platform.  But I have little interest in yet another linux computer
+so this is about bare metal (no operating system).  So far there is some
+good documentation for Linux users, there is a manual with some holes
+in it for the chip but better than most for platforms like this.
+
+I am an ARM fan but it is nice to see something non-arm from time to
+time, this platform is based around a MIPS core.  Most of the work
+is not related to ARM nor MIPS anyway.
+
+Unlike the pi but as with most Linux/OS capable systems this has a
+bootloader, u-boot being a popular choice and that is the case here.
+Unfortunately like some u-boot ports they didnt bother to keep some
+of the freebies like s-record loading.  So far as I can tell the sd
+card is not supported by u-boot, but is later by Linux (or whatever
+software we write to talk to it), so it is not a mechanism for moving
+programs over to the on board flash used for booting.  USB is supported
+so my recommended minimum starting point is the omega2 without the
+extra couple of bucks worth of sd card holder and the expansion board
+that gives us USB support.
+
+https://www.sparkfun.com/products/14432
+https://www.sparkfun.com/products/14439
+
+And a FAT32 formatted thumb drive.
+
+There is a lot of good documentation, but not much of it helps with
+baremetal
+
+https://docs.onion.io/omega2-docs/
+
+There is info on reloading the linux/os image from the bootloader.
+
+The expansion board has a silabs usb to uart interface for us, that
+is why uart 0 pins are not on the header.
+
+[ 9966.623072] usb 1-3.4.1: new full-speed USB device number 35 using ehci-pci
+[ 9966.762055] usb 1-3.4.1: New USB device found, idVendor=10c4, idProduct=ea60
+[ 9966.762058] usb 1-3.4.1: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[ 9966.762059] usb 1-3.4.1: Product: CP2102 USB to UART Bridge Controller
+[ 9966.762061] usb 1-3.4.1: Manufacturer: Silicon Labs
+[ 9966.762062] usb 1-3.4.1: SerialNumber: 0001
+[ 9966.770086] cp210x 1-3.4.1:1.0: cp210x converter detected
+[ 9966.770290] usb 1-3.4.1: cp210x converter now attached to ttyUSB1
+
+Connecting at 115200 8N1 you can see the bootloader and serial console.
+
+
+
+   ____       _             ____
+  / __ \___  (_)__  ___    / __ \__ _  ___ ___ ____ _
+ / /_/ / _ \/ / _ \/ _ \  / /_/ /  ' \/ -_) _ `/ _ `/
+ \____/_//_/_/\___/_//_/  \____/_/_/_/\__/\_, /\_,_/
+ W H A T  W I L L  Y O U  I N V E N T ? /___/"
+
+Board: Onion Omega2 APSoC DRAM:  128 MB
+relocate_code Pointer at: 87f60000
+flash manufacture id: c2, device id 20 19
+find flash: MX25L25635E
+*** Warning - bad CRC, using default environment
+
+============================================
+Onion Omega2 UBoot Version: 4.3.0.3
+--------------------------------------------
+ASIC 7628_MP (Port5<->None)
+DRAM component: 1024 Mbits DDR, width 16
+DRAM bus: 16 bit
+Total memory: 128 MBytes
+Flash component: SPI Flash
+Date:Oct 18 2016  Time:17:29:05
+============================================
+icache: sets:512, ways:4, linesz:32 ,total:65536
+dcache: sets:256, ways:4, linesz:32 ,total:32768
+CPU freq = 575 MHZ
+Estimated memory size = 128 Mbytes
+Resetting MT7628 PHY.
+Initializing MT7688 GPIO system.
+
+
+**************************************
+* Hold Reset button for more options *
+**************************************
+
+
+You have 40 seconds left to select a menu option...
+
+
+Please select option:
+   [ Enter ]: Boot Omega2.
+   [ 0 ]: Start Web recovery mode.
+   [ 1 ]: Start command line mode.
+   [ 2 ]: Flash firmware from USB storage.
+
+
+The expansion board as a switch which is a power switch and the angled
+corner has a so called reset button.  Hold the "reset" button and
+flip the switch off then on and you will see the above choices
+
+We want 1 for now  start in command line mode.
+
+
+Option [1] selected.
+
+1: System Enter Boot Command Line Interface.
+
+U-Boot 1.1.3 (Oct 18 2016 - 17:29:05)
+Omega2 #
+
+
+There are instructions for building a cross-compile environment for
+this platform which includes some libraries.  You can use that you
+can google around for a mips gcc pre-built or I have my own repo
+that contains a script to build a gcc based mips toolchain from
+sources
+https://github.com/dwelch67/build_gcc
+the build_mips script.
+
+Yes all my development work is on (yet another) Linux (computer).  It
+is easy to get a thumb drive bootable linux to play with or put one on
+a virtual machine like VirtualBox or vmware or others.  This can of
+course all be done on windows or macos with some small tweaking here
+and there.
+
+On the docs.onion.io page under hardware overview they have a link
+to the processor documentation we will rely on heavily, as of this
+writing this is the link to version 1.4:
+
+https://labs.mediatek.com/fileMedia/download/9ef51e98-49b1-489a-b27e-391bac9f7bf3
+
+The omega2 docs tell us that the led is on GPIO44 and that appears
+to be true you can from this command line interface use nm to write
+0x1000 to address 0x10000634
+
+Omega2 # nm 0x10000634
+10000634: ffffffff ? 0x1000
+10000634: ffffffff ? ?
+Omega2 #
+
+I dont know if that is the proper way to exit from the nm command but
+I just happened to figure out entering a question mark bumps us back
+to the u-boot command line.  When you enter the 1000 above you can
+see that the (amber) led turns off on the board.  To turn it back on
+
+Omega2 # nm 0x10000644
+10000644: ffffffff ? 0x1000
+10000644: ffffffff ? ?
+Omega2 #
+
+So ideally we would want to write/run a simple program
+
+80000000:   3c021000    lui $2,0x1000
+80000004:   24031000    li  $3,4096
+80000008:   ac430634    sw  $3,1588($2)
+8000000c:   1000ffff    b   8000000c <_start+0xc>
+80000010:   00000000    nop
+
+But using mm to load this program and go to run it does not (yet) work.
+A mystery I hope to resolve.  u-boot is a monstrosity in and of itself
+on a par with an operating system.  Why cant they just use a simple
+bootloader?
+
+Note because among other things DDR init is a nightmare, we do want to
+just let u-boot boot for us.  We are not completely baremetal from
+processor start, but that is okay, the fun stuff is still left there
+to play with.  We just have to figure out how to get u-boot to work
+for us rather than against us.  An operating system is or at least
+starts off as just another baremetal program there is not much special
+about launching/booting an operating system and we can certainly
+launch/boot our programs using u-boot if we figure out how.
+
+------------
+
+What I have so far.  See blinker00
+
+It is a bit disturbing thus far but I have had some success.
+
+mips-elf-as -EL --warn --fatal-warnings  vectors.s -o vectors.o
+mips-elf-ld -EL vectors.o -T memmap -o blinker00.elf
+mips-elf-objdump -D blinker00.elf > blinker00.list
+mips-elf-objcopy blinker00.elf -O binary blinker00.bin
+mkimage -A mips -O linux -T standalone -C none -a 0x80000000 -e 0x80000040 -n "blinker00" -d blinker00.bin omega2.bin
+Image Name:   blinker00
+Created:      Tue Dec 26 11:04:47 2017
+Image Type:   MIPS Linux Standalone Program (uncompressed)
+Data Size:    56 Bytes = 0.05 kB = 0.00 MB
+Load Address: 80000000
+Entry Point:  80000040
+
+(mkimage here again trivial to come by as with other things Linux just
+apt-get it (ubuntu or mint or other derivatives), no doubt available
+for windows/macos)
+
+u-boot likes its header that mkimage puts on there as well as I assume
+a checksum or magic number.  The -C none means we are not compressing
+our program, maybe thats a bad thing, will see.  -T standalone means
+that u-boot is launching a program that might even return back to u-boot
+and for now it does (at the time of this writing, I have commented out
+code that doesnt).
+
+The listing shows our program
+
+80000040 <_start>:
+80000040:   3c021000    lui $2,0x1000
+80000044:   24031000    li  $3,4096
+80000048:   ac430634    sw  $3,1588($2)
+8000004c:   00000000    nop
+80000050:   03e00008    jr  $31
+80000054:   00000000    nop
+80000058:   00000000    nop
+
+And a hexdump shows that the header is 0x40 bytes
+
+hexdump -C omega2.bin
+00000000  27 05 19 56 e5 60 c4 07  5a 42 73 1f 00 00 00 38  |'..V.`..ZBs....8|
+00000010  80 00 00 00 80 00 00 40  27 bb ce 7e 05 05 01 00  |.......@'..~....|
+00000020  62 6c 69 6e 6b 65 72 30  30 00 00 00 00 00 00 00  |blinker00.......|
+00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+00000040  00 10 02 3c 00 10 03 24  34 06 43 ac 00 00 00 00  |...<...$4.C.....|
+00000050  08 00 e0 03 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+00000060  00 00 01 00 01 01 00 01  00 00 00 00 00 00 00 00  |................|
+00000070  00 00 00 00 00 00 00 00                           |........|
+00000078
+
+So a disturbing hack is to say that our entry point is at 0x80000040
+I wondered if it was a decompression thing and we want the raw data
+to be there and it decompresses to the final destination so we can
+launch into it, but no joy.
+
+gzip not supported
+
+lzma gives
+
+Uncompressing Standalone Application ... LZMA ERROR 1 - must RESET board to recover
+
+lz4 not supported
+
+So to run this program with what we have so far.  Copy omega2.bin to
+the thumb drive.
+
+Hold the "reset" button while powering on the expansion board (use
+the switch).  Press 1 to start in command line mode
+
+
+usb reset
+fatload usb 0:1 0x80000000 omega2.bin
+bootm 0x80000000
+
+when you run the last command note that the (amber) led turns off.
+Because we ran as standalone and because we returned it takes us
+back to the u-boot command line
+
+Omega2 # bootm 0x80000000
+## Booting image at 80000000 ...
+   Image Name:   blinker00
+   Image Type:   MIPS Linux Standalone Program (uncompressed)
+   Data Size:    56 Bytes =  0.1 kB
+   Load Address: 80000000
+   Entry Point:  80000040
+   Verifying Checksum ... OK
+   XIP Standalone Application ... OK
+Omega2 #
+
+If you use the same commands with the omega2.bin file built in the
+blinker01 directory then you will see the led blink forever.
+
+---------
+
+
+
+
+
+
+
