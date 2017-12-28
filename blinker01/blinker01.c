@@ -12,9 +12,9 @@ int notmain ( void )
     while(1)
     {
         PUT32(GPIO_DSET_1,0x1000);
-        for(ra=0;ra<20000000;ra++) dummy(ra);
+        for(ra=0;ra<400000;ra++) dummy(ra);
         PUT32(GPIO_DCLR_1,0x1000);
-        for(ra=0;ra<20000000;ra++) dummy(ra);
+        for(ra=0;ra<400000;ra++) dummy(ra);
 
     }
     return(0);
