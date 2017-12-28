@@ -377,6 +377,80 @@ The 0x00 register (0x10000c00) when written goes to the transmitter
 holding register and/or fifo.  So by writing a 0x55 (the letter 'U')
 we can see that we inserted it into the output.
 
-I will be adding uart based programs to this repo and eventually an
-s-record bootloader so we dont have to move the thumb drive back and
-forth.
+The bootloader01 directory contains a bootloader I have used many
+times it is s-record based
+
+https://en.wikipedia.org/wiki/SREC_(file_format)
+
+Specifically it looks for the S3 format.
+
+    $(GNUMIPS)-objcopy --srec-forceS3 blinker01.elf -O srec blinker01.srec
+
+So my compiler produced this for blinker01 (as of this writing)
+
+S0110000626C696E6B657230312E73726563CB
+S315000000001000000C00811D3C00000000FFFF0010E6
+S3150000001000000000000000000800E003000085ACBE
+S31500000020000000000000828C0800E00300000000D1
+S31500000030000000000800E0030000000000000000CF
+S31500000040D8FFBD271C00B2AF1800B1AF0010123C9C
+S315000000500600113C2000B3AF2400BFAF3406532680
+S315000000601400B0AF801A312644065226001005242B
+S315000000700600000C252060022580000025200002D5
+S315000000800D00000C01001026FDFF111625200002B0
+S31500000090001005240600000C2520400225800000E3
+S315000000A0252000020D00000C01001026FDFF111690
+S311000000B025200002EEFF001000100524C1
+S315000000C00000010001010001000000000000000026
+S30D000000D0000000000000000022
+S70500000000FA
+
+If you do the omega2.bin thing above and put bootloader01 in flash
+Then you can cut and paste the above into the terminal.  Then
+hit the g key to go or run the program
+
+                if((ra=='g')||(ra=='G'))
+                {
+                    hexstring(entry);
+                    uart_flush();
+                    BRANCHTO(entry);
+                }
+
+
+Boot Linux from Flash NO RESET PRESSED.
+## Booting image at bc050000 ...
+   Image Name:   notmain
+   Image Type:   MIPS Linux Standalone Program (uncompressed)
+   Data Size:    1376 Bytes =  1.3 kB
+   Load Address: 01000000
+   Entry Point:  01000000
+   Verifying Checksum ... OK
+OK
+12345678
+
+SREC
+00000000
+00000000
+
+And the led will blink.
+
+I have left an omega2.bin in this base directory for you to use in case
+you are struggling to get your toolchain to work.  At least you can
+see the program load into flash and run on boot.
+
+Note the documentation for this chip says it is a MIPS24KEc but if I
+use -march=24kec on the gcc command line then bootloader01 does not
+build a working binary.  So I am going ultra concervative and using
+-mips1.  The bootloader works now.
+
+Note if using minicom you can use ctrl-a then s then select ascii
+to download the srec file.  It spawns a separate program to do this
+so there is some data loss as it returns back to minicom so you wont
+see the first entry printout, but should see it when you enter g to go.
+I have not determined if the uart_flush() is correct yet.
+
+Once this is in place you dont need to do the thumb drive dance anymore
+you can simply reset or power cycle (does the reset button even work
+as a reset?) to run the bootloader from on board flash.  Makes life
+much easier.
+

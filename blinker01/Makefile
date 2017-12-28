@@ -4,7 +4,8 @@ GNUMIPS ?= mips-elf
 
 ENDIAN = -EL
 AOPS = $(ENDIAN) --warn --fatal-warnings 
-COPS = $(ENDIAN) -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -march=24kec
+COPSx = $(ENDIAN) -G 0 -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -march=24kec
+COPS = $(ENDIAN) -G 0 -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -mips1
 
 gcc : blinker01.bin omega2.bin
 
