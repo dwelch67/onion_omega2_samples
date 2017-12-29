@@ -1,0 +1,19 @@
+
+See top level README for documentation on this platform.
+
+I have lightly touched on MIPS before, learning more as I go here which
+was a reason for getting these boards.
+
+There is a coprocesssor 0 count register that is in theory a free-running
+counter.  Comparing it against a stopwatch I see 287Mhz which is half
+of the 575 we are maybe running at.  So assuming that is true then this
+counter ticks off at 287500000 ticks per second so two seconds is
+575000000 ticks.  The register counts up.  I will leave it as an
+exercise to the reader to understand that so long as you give yourself
+a little distance from the max count and you properly mask (in this case
+it is a 32 bit register with 32 bit math so it automatically masks itself
+but I put a mask there to emphasize the point, a 24 bit counter with
+32 bit math for example wouldnt work unless you mask the result, again
+an exercise to the reader).
+
+So the led changes state every 2 seconds.

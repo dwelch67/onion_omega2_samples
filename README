@@ -454,3 +454,19 @@ you can simply reset or power cycle (does the reset button even work
 as a reset?) to run the bootloader from on board flash.  Makes life
 much easier.
 
+----------------------------------------------
+
+The processor id register reads as
+
+00019655
+
+0x96 family  which is the 24KE from what I can tell
+
+00019655 PRId
+80040483 Config0
+BEE3519E Config1
+80000000 Config2
+
+
+
+
