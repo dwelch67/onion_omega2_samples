@@ -7,7 +7,7 @@ AOPS = $(ENDIAN) --warn --fatal-warnings
 COPSx = $(ENDIAN) -G 0 -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -march=24kec
 COPS = $(ENDIAN) -G 0 -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -mips1
 
-gcc : blinker01.bin omega2.bin
+gcc : notmain.bin omega2.bin
 
 clean :
 	rm -f *.o
@@ -20,17 +20,17 @@ clean :
 vectors.o : vectors.s
 	$(GNUMIPS)-as $(AOPS) vectors.s -o vectors.o
 
-blinker01.o : blinker01.c
-	$(GNUMIPS)-gcc $(COPS) -c blinker01.c -o blinker01.o
+notmain.o : notmain.c
+	$(GNUMIPS)-gcc $(COPS) -c notmain.c -o notmain.o
 
-blinker01.elf : memmap vectors.o blinker01.o 
-	$(GNUMIPS)-ld $(ENDIAN) vectors.o blinker01.o -T memmap -o blinker01.elf
-	$(GNUMIPS)-objdump -D blinker01.elf > blinker01.list
+notmain.elf : memmap vectors.o notmain.o 
+	$(GNUMIPS)-ld $(ENDIAN) vectors.o notmain.o -T memmap -o notmain.elf
+	$(GNUMIPS)-objdump -D notmain.elf > notmain.list
 
-blinker01.bin : blinker01.elf
-	$(GNUMIPS)-objcopy --srec-forceS3 blinker01.elf -O srec blinker01.srec
-	$(GNUMIPS)-objcopy blinker01.elf -O binary blinker01.bin
+notmain.bin : notmain.elf
+	$(GNUMIPS)-objcopy --srec-forceS3 notmain.elf -O srec notmain.srec
+	$(GNUMIPS)-objcopy notmain.elf -O binary notmain.bin
 
-omega2.bin : blinker01.bin
-	mkimage -A mips -O linux -T standalone -C none -a 0x00000000 -e 0x00000000 -n "blinker01" -d blinker01.bin omega2.bin
+omega2.bin : notmain.bin
+	mkimage -A mips -O linux -T standalone -C none -a 0xA0000000 -e 0xA0000000 -n "notmain" -d notmain.bin omega2.bin
 

@@ -27,5 +27,5 @@ blinker00.bin : blinker00.elf
 	$(GNUMIPS)-objcopy blinker00.elf -O binary blinker00.bin
 
 omega2.bin : blinker00.bin
-	mkimage -A mips -O linux -T standalone -C none -a 0x00000000 -e 0x00000000 -n "blinker00" -d blinker00.bin omega2.bin
+	mkimage -A mips -O linux -T standalone -C none -a 0xA0000000 -e 0xA0000000 -n "blinker00" -d blinker00.bin omega2.bin
 

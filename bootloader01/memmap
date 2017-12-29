@@ -1,13 +1,11 @@
 
 MEMORY
 {
-    rom : ORIGIN = 0x01000000, LENGTH = 0x10000
-    ram : ORIGIN = 0x02000000, LENGTH = 0x10000
+    ram : ORIGIN = 0xA1000000, LENGTH = 0x00800000
 }
 
 SECTIONS
 {
-    .text : { *(.text*) } > rom
-    .rodata : { *(.rodata*) } > rom
+    .text : { *(.text*) } > ram
     .bss : { *(.bss*) } > ram
 }

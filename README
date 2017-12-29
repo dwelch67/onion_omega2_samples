@@ -467,6 +467,20 @@ The processor id register reads as
 BEE3519E Config1
 80000000 Config2
 
+-----------------------------------------
 
+As I learn more about MIPS.  The 32 bit address space is broken up
+into mirrored sections.  The first half starting at 0x00000000 is
+user memory space, through a tlb for user access.  Dont want that.
+Starting at 0xA0000000 we have uncached kernel/priveledged access
+(to the the first 0x20000000 bytes at 0x00000000).  Want that.
+Basically address 0x00000000 is mapped to a number of places depending
+on what address you use to access can/may determine cachability
+or if you are behind the mmu.  Initially dont want any of that want
+clean priveleged access.  So these examples are setup to have the
+stack come down from 0xA0FFFFFC and the program start at 0xA0000000.
+The bootloader is setup to use 0xA1000000 to 0xA1FFFFFC.  It is not
+all of the memory for the omega2 not plus, but enough for these
+projects.
 
 

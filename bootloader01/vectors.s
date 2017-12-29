@@ -2,7 +2,7 @@
 .globl _start
 _start:
 
-    li $sp,0x02000000
+    li $sp,0xA2000000
     jal notmain
     nop
     b .

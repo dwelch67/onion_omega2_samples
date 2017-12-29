@@ -32,5 +32,5 @@ notmain.bin : notmain.elf
 	$(GNUMIPS)-objcopy notmain.elf -O binary notmain.bin
 
 omega2.bin : notmain.bin
-	mkimage -A mips -O linux -T standalone -C none -a 0x00000000 -e 0x00000000 -n "notmain" -d notmain.bin omega2.bin
+	mkimage -A mips -O linux -T standalone -C none -a 0xA0000000 -e 0xA0000000 -n "notmain" -d notmain.bin omega2.bin
 
