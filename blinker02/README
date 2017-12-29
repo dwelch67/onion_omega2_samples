@@ -1,0 +1,11 @@
+
+See top level README for documentation on this platform.
+
+There are two timers timer0 and timer1 this uses timer0.  The timer
+is driven by a 1MHz clock (1 microsecond per tick).  The timer is
+a 16 bit timer with a 16 bit prescaler.  So we can only count to 65536
+on the main timer.  1000000/65536 = 15.258.  So if we use a prescaler
+of /16  1000000/16 = 62500.  So to count to 2 seconds double the
+prescaler to 32.
+
+The led should change state once every 2 seconds.
