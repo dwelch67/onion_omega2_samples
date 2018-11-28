@@ -1,0 +1,5 @@
+
+
+UART 0 for bootloader,  hold reset when powering on.
+
+GPIO ON BIT 15 OF SECOND SET OF REGISTERS
